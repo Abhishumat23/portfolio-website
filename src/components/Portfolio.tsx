@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Mail, Moon, Sun, ChevronDown } from 'lucide-react';
-import { Player } from '@lottiefiles/react-lottie-player'; // Import Lottie Player
+import { Github, Linkedin, Mail, Moon, Sun, ChevronDown, Menu, X } from 'lucide-react';
+import { Player } from '@lottiefiles/react-lottie-player';
 
 type Skill = {
   name: string;
@@ -28,7 +28,8 @@ const aboutText = [
   },
 ];
 
-const playerStyle = { height: '400px', width: '400px' };
+const playerStyleDesktop = { height: '400px', width: '400px' }; // Size for desktop
+const playerStyleMobile = { height: '250px', width: '250px' }; // Size for mobile
 
 const AboutSection: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => (
   <section id="about" className="min-h-screen py-16 flex items-center">
@@ -36,16 +37,22 @@ const AboutSection: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => (
       <h2 className="text-3xl font-bold mb-8 text-center">About Me</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         <div className="flex justify-center">
-          {/* Replace image with Lottie animation */}
           <Player
             autoplay
             loop
             src="/assets/boy-waving.json" // Path to your Lottie file in the public/assets folder
-            style={playerStyle} // Apply defined style
+            style={playerStyleDesktop} // Apply desktop style by default
+            className="hidden md:block" // Visible on larger screens
+          />
+          <Player
+            autoplay
+            loop
+            src="/assets/boy-waving.json" // Path to your Lottie file in the public/assets folder
+            style={playerStyleMobile} // Apply mobile style
+            className="block md:hidden" // Visible on mobile screens only
           />
         </div>
         <div>
-          {/* Render the text paragraphs from the array */}
           {aboutText.map((paragraph) => (
             <p key={paragraph.id} className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>
               {paragraph.text}
@@ -125,6 +132,7 @@ const projects = [
 const Portfolio: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State for menu toggle
 
   useEffect(() => {
     const handleScroll = () => {
@@ -147,30 +155,55 @@ const Portfolio: React.FC = () => {
     setIsDarkMode(!isDarkMode);
   };
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
       <nav className={`fixed top-0 left-0 right-0 z-50 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} bg-opacity-80 backdrop-blur-sm`}>
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="text-xl font-light">Abhishumat Singh Beniwal</div>
-            <div className="flex items-center space-x-6">
-              {['home', 'about', 'skills', 'projects', 'contact'].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item}`}
-                  className={`text-sm uppercase tracking-wider hover:text-blue-500 transition-colors ${
-                    activeSection === item ? 'text-blue-500' : ''
-                  }`}
-                >
-                  {item}
-                </a>
-              ))}
-              <button onClick={toggleDarkMode} className={`p-2 rounded-full ${isDarkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-700'}`}>
-                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-            </div>
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="text-xl font-light">Abhishumat Singh Beniwal</div>
+          <div className="hidden md:flex items-center space-x-6"> {/* Hide on mobile */}
+            {['home', 'about', 'skills', 'projects', 'contact'].map((item) => (
+              <a
+                key={item}
+                href={`#${item}`}
+                className={`text-sm uppercase tracking-wider hover:text-blue-500 transition-colors ${
+                  activeSection === item ? 'text-blue-500' : ''
+                }`}
+              >
+                {item}
+              </a>
+            ))}
+            <button onClick={toggleDarkMode} className={`p-2 rounded-full ${isDarkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-700'}`}>
+              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+          </div>
+          <div className="md:hidden flex items-center space-x-2"> {/* Show on mobile */}
+            <button onClick={toggleDarkMode} className={`p-2 rounded-full ${isDarkMode ? 'bg-gray-700 text-yellow-300' : 'bg-gray-200 text-gray-700'}`}>
+              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button onClick={toggleMenu} className="p-2">
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className={`md:hidden bg-gray-800 bg-opacity-90 text-white`}>
+            {['home', 'about', 'skills', 'projects', 'contact'].map((item) => (
+              <a
+                key={item}
+                href={`#${item}`}
+                onClick={toggleMenu}
+                className="block px-4 py-2 border-b border-gray-700 hover:bg-gray-700"
+              >
+                {item}
+              </a>
+            ))}
+          </div>
+        )}
       </nav>
 
       <section id="home" className="min-h-screen flex items-center justify-center relative">
@@ -178,16 +211,56 @@ const Portfolio: React.FC = () => {
         <Player
           autoplay
           loop
-          src="/assets/floating-ring.json" // First floating animation
-          style={{ height: '450px', width: '450px', position: 'absolute', top: '30%', left: '35%' }}
+          src="/assets/floating-ring.json"
+          style={{
+            height: '400px', // Default for desktop
+            width: '400px',
+            position: 'absolute',
+            top: '25%',
+            left: '35%',
+          }}
+          className="hidden md:block" // Visible on larger screens
         />
         <Player
           autoplay
           loop
-          src="/assets/box-open.json" // Second floating animation
-          style={{ height: '250px', width: '250px', position: 'absolute', top: '10%', right: '5%' }}
+          src="/assets/floating-ring.json"
+          style={{
+            height: '300px', // Adjusted for responsiveness on mobile
+            width: '300px',
+            position: 'absolute',
+            top: '30%',
+            left: '15%',
+          }}
+          className="block md:hidden" // Visible on mobile screens
         />
-        <div className="text-center relative z-10"> {/* z-10 to ensure text is above the animations */}
+        <Player
+          autoplay
+          loop
+          src="/assets/box-open.json"
+          style={{
+            height: '350px', // Default for desktop
+            width: '350px',
+            position: 'absolute',
+            top: '10%',
+            right: '10%',
+          }}
+          className="hidden md:block" // Visible on larger screens
+        />
+        <Player
+          autoplay
+          loop
+          src="/assets/box-open.json"
+          style={{
+            height: '220px', // Adjusted for responsiveness on mobile
+            width: '220px',
+            position: 'absolute',
+            top: '10%',
+            right: '2%',
+          }}
+          className="block md:hidden" // Visible on mobile screens
+        />
+        <div className="text-center relative z-10">
           <motion.h1 initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }} className="text-5xl font-bold mb-4">
             Abhishumat Singh Beniwal
           </motion.h1>
